@@ -9,4 +9,10 @@
   }
   .blogItem h3{
     cursor: pointer;
+    font-size: 2rem;
+    padding: 0;
+    margin: 0;
+  }
+  .blogItemp{
+    max-width: 45vw;
   }

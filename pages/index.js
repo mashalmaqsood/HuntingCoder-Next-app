@@ -25,6 +25,7 @@ export default function Home() {
         <div className={styles.imagewrap}>
           <Image
             className={styles.myImg}
+            alt = "homepage"
             src="/homeimg.avif"
             width={278}
             height={300}
