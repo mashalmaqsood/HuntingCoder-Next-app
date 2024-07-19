@@ -1,18 +1,10 @@
 import React, { useEffect, useState } from "react";
 import styles from "../styles/Blog.module.css";
 import Link from "next/link";
+import * as fs from "fs";
 
-const blog = (props) => {
+const Blog = (props) => {
   const [blogs, setBlogs] = useState(props.allBlogs);
-  useEffect(() => {
-    console.log("useeffect is running");
-    fetch("http://localhost:3000/api/blogs").then((a) => {
-      return a.json().then((parsed) => {
-        setBlogs(parsed);
-      });
-    });
-  }, []);
-
   return (
     <div className={styles.container}>
       <main className={styles.main}>
@@ -33,13 +25,19 @@ const blog = (props) => {
   );
 };
 
-// this functions runs at server side
-export const getServerSideProps = async () => {
-  let data = await fetch("http://localhost:3000/api/blogs");
-  let allBlogs = await data.json();
+export const getStaticProps = (async (context) => {
+  let data = await fs.promises.readdir("blogposts");
+  const newData = data.slice(1);
+  let myFile;
+  let allBlogs = [];
+  for (let i = 0; i < newData.length; i++) {
+    const item = newData[i];
+    myFile = await fs.promises.readFile("blogposts/" + item, "utf-8");
+    allBlogs.push(JSON.parse(myFile));
+  }
   return {
-    props: { allBlogs },
-  };
-};
+    props: {allBlogs}, // will be passed to the page component as props
+  }
+})
 
-export default blog;
+export default Blog;

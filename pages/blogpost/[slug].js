@@ -1,38 +1,45 @@
-import React,{useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import styles from "../../styles/Blogpost.module.css";
+import * as fs from "fs";
 
-const Slug = () => {
-  const [blog, setBlog] = useState();
-  const router = useRouter();
-  useEffect(() => {
-    if(!router.isReady) return;
-    const { slug } = router.query;
-    fetch( `http://localhost:3000/api/getblog?slug=${slug}`).then((a) => {
-      return a.json().then((parsed) => {
-        setBlog(parsed);
-      });
-    });
-  }, [router.isReady]);
+const Slug = (props) => {
+  const [blog, setBlog] = useState(props.allBlogs);
+  function createMarkup(content) {
+    return {__html: content};
+  }
 
   return (
     <div className={styles.container}>
       <main className={styles.main}>
         <h1>{blog?.title}</h1>
         <hr />
-        <div>{blog?.content}</div>
+        {blog &&  <div dangerouslySetInnerHTML={createMarkup(blog.content)}></div> }
       </main>
     </div>
   );
 };
 
-export const getServerSideProps = async (context) => {
- const { slug } = context.query;
- let data = await fetch(`http://localhost:3000/api/getblog?slug=${slug}`);
- let allBlogs = await data.json();
- return {
-  props : {allBlogs}
- }
+export const getStaticPaths = async () => {
+  return {
+    paths: [
+      { params: { slug: "how-to-learn-javascript" } },
+      { params: { slug: "how-to-learn-nextjs" } },
+      { params: { slug: "how-to-learn-reactjs" } },
+    ],
+    fallback: true 
+  };
 };
+
+export const getStaticProps = async (context) => {
+  const { slug } = context.params;
+  let myBlog = await fs.promises.readFile(`blogposts/${slug}.json`, "utf-8");
+  return {
+    props: {
+      myBlog: JSON.parse(myBlog),
+    },
+  };
+};
+
 
 export default Slug;
